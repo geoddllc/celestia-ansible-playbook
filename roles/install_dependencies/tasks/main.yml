@@ -1,0 +1,16 @@
+---
+- name: Install required packages
+  apt:
+    name:
+      - curl
+      - git
+      - wget
+      - htop
+      - tmux
+      - build-essential
+      - jq
+      - make
+      - lz4
+      - gcc
+      - unzip
+    state: present
