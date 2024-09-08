@@ -1,0 +1,88 @@
+---
+- hosts: all
+  become: yes
+  vars_files:
+    - ../roles/setup_celestia/vars/main.yml
+
+  tasks:
+    - name: Download Celestia binary
+      shell: |
+        cd $HOME
+        rm -rf celestia-app
+        git clone https://github.com/celestiaorg/celestia-app.git
+        cd celestia-app/
+        git checkout tags/{{ app_version }} -b {{ app_version }}
+        make install
+
+    - name: Clone networks repo
+      shell: |
+        cd $HOME
+        rm -rf networks
+        git clone https://github.com/celestiaorg/networks.git
+
+    - name: Initialize Celestia app
+      shell: |
+        celestia-appd init "test" --chain-id {{ celestia_chain_id }}
+        cp $HOME/networks/mocha-4/genesis.json $HOME/.celestia-app/config
+        sed -i -e "s|^target_height_duration *=.*|timeout_commit = '11s'|" $HOME/.celestia-app/config/config.toml
+
+    - name: Configure Celestia node
+      shell: |
+        celestia-appd config node tcp://localhost:{{ celestia_port }}657
+        celestia-appd config keyring-backend os
+        celestia-appd config chain-id mocha-4
+
+    - name: Download genesis and addrbook
+      shell: |
+        wget -O $HOME/.celestia-app/config/genesis.json https://server-4.itrocket.net/testnet/celestia/genesis.json
+        wget -O $HOME/.celestia-app/config/addrbook.json https://server-4.itrocket.net/testnet/celestia/addrbook.json
+
+    - name: Set seeds and peers
+      shell: |
+        sed -i -e "/^\[p2p\]/,/^\[/{s/^[[:space:]]*seeds *=.*/seeds = '{{ seeds }}'/}" \
+               -e "/^\[p2p\]/,/^\[/{s/^[[:space:]]*persistent_peers *=.*/persistent_peers = '{{ peers }}'/}" \
+               $HOME/.celestia-app/config/config.toml
+
+    - name: Configure ports in config.toml
+      shell: |
+        sed -i.bak -e "s%:26658%:{{ celestia_port }}658%g;
+        s%:26657%:{{ celestia_port }}657%g;
+        s%:6060%:{{ celestia_port }}060%g;
+        s%:26656%:{{ celestia_port }}656%g;
+        s%^external_address = \"\"%external_address = \"$(wget -qO- eth0.me):{{ celestia_port }}656\"%;
+        s%:26660%:{{ celestia_port }}660%g" $HOME/.celestia-app/config/config.toml
+
+    - name: Configure pruning
+      shell: |
+        sed -i -e "s/^pruning *=.*/pruning = 'custom'/" $HOME/.celestia-app/config/app.toml
+        sed -i -e "s/^pruning-keep-recent *=.*/pruning-keep-recent = '100'/" $HOME/.celestia-app/config/app.toml
+        sed -i -e "s/^pruning-interval *=.*/pruning-interval = '50'/" $HOME/.celestia-app/config/app.toml
+
+    - name: Set minimum gas price, enable Prometheus, and disable indexing
+      shell: |
+        sed -i 's|minimum-gas-prices =.*|minimum-gas-prices = "0.002utia"|g' $HOME/.celestia-app/config/app.toml
+        sed -i -e "s/prometheus = false/prometheus = true/" $HOME/.celestia-app/config/config.toml
+        sed -i -e "s/^indexer *=.*/indexer = 'null'/" $HOME/.celestia-app/config/config.toml
+
+    - name: Create Celestia systemd service file
+      copy:
+        dest: /etc/systemd/system/celestia-appd.service
+        content: |
+          [Unit]
+          Description=Celestia node
+          After=network-online.target
+          [Service]
+          User={{ ansible_user }}
+          WorkingDirectory=$HOME/.celestia-app
+          ExecStart=$(which celestia-appd) start --home $HOME/.celestia-app
+          Restart=on-failure
+          RestartSec=5
+          LimitNOFILE=65535
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd and start Celestia service
+      shell: |
+        sudo systemctl daemon-reload
+        sudo systemctl enable celestia-appd
+        sudo systemctl restart celestia-appd && sudo journalctl -u celestia-appd -f
