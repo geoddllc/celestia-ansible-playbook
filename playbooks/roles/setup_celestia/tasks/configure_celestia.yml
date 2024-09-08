@@ -1,0 +1,8 @@
+---
+- name: Configure Celestia node
+  shell: |
+    celestia-appd config keyring-backend os
+    celestia-appd config chain-id {{ celestia_chain_id }}
+  args:
+    executable: /bin/bash
+  become: false

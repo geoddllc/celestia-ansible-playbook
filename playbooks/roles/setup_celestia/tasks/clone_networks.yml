@@ -1,0 +1,9 @@
+---
+- name: Clone networks repo
+  shell: |
+    cd $HOME
+    rm -rf networks
+    git clone https://github.com/celestiaorg/networks.git
+  args:
+    executable: /bin/bash
+  become: false

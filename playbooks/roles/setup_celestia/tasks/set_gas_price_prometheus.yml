@@ -1,0 +1,9 @@
+---
+- name: Set minimum gas price, enable Prometheus, and disable indexing
+  shell: |
+    sed -i 's|minimum-gas-prices =.*|minimum-gas-prices = "0.002utia"|g' $HOME/.celestia-app/config/app.toml
+    sed -i -e "s/prometheus = false/prometheus = true/" $HOME/.celestia-app/config/config.toml
+    sed -i -e "s/^indexer *=.*/indexer = 'null'/" $HOME/.celestia-app/config/config.toml
+  args:
+    executable: /bin/bash
+  become: false

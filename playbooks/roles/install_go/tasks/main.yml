@@ -6,19 +6,20 @@
     sudo rm -rf /usr/local/go
     sudo tar -C /usr/local -xzf "go{{ go_version }}.linux-amd64.tar.gz"
     rm "go{{ go_version }}.linux-amd64.tar.gz"
+  args:
+    executable: /bin/bash
 
 - name: Create .bash_profile if not present
-  shell: |
-    [ ! -f ~/.bash_profile ] && touch ~/.bash_profile
+  file:
+    path: "{{ ansible_env.HOME }}/.bash_profile"
+    state: touch
+    mode: '0644'
 
 - name: Add Go binary to PATH in .bash_profile
   lineinfile:
     dest: ~/.bash_profile
     line: "export PATH=$PATH:/usr/local/go/bin:~/go/bin"
     state: present
-
-- name: Source .bash_profile
-  shell: source $HOME/.bash_profile
 
 - name: Ensure ~/go/bin directory exists
   file:

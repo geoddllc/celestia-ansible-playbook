@@ -1,0 +1,43 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    snapshot_url: "https://server-4.itrocket.net/testnet/celestia/celestia_2024-09-08_2658185_snap.tar.lz4"
+    celestia_home: "/home/{{ ansible_user }}/.celestia-app"
+
+  tasks:
+    - name: Download snapshot asynchronously
+      shell: |
+        curl {{ snapshot_url }} -o {{ celestia_home }}/snapshot.tar.lz4
+      async: 1800  # Allow up to 30 minutes for the download
+      poll: 1  # Poll every second, waiting for the task to complete
+      register: snapshot_download
+
+    - name: Stop Celestia app service
+      systemd:
+        name: celestia-appd
+        state: stopped
+
+    - name: Backup priv_validator_state.json
+      copy:
+        src: "{{ celestia_home }}/data/priv_validator_state.json"
+        dest: "{{ celestia_home }}/priv_validator_state.json.backup"
+
+    - name: Remove current Celestia app data directory
+      file:
+        path: "{{ celestia_home }}/data"
+        state: absent
+
+    - name: Extract snapshot to data directory
+      shell: |
+        lz4 -dc {{ celestia_home }}/snapshot.tar.lz4 | tar -xf - -C {{ celestia_home }}
+
+    - name: Restore priv_validator_state.json
+      copy:
+        src: "{{ celestia_home }}/priv_validator_state.json.backup"
+        dest: "{{ celestia_home }}/data/priv_validator_state.json"
+
+    - name: Restart Celestia app service
+      systemd:
+        name: celestia-appd
+        state: restarted

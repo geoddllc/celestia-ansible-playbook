@@ -1,0 +1,9 @@
+---
+- name: Reload systemd and start Celestia service
+  shell: |
+    sudo systemctl daemon-reload
+    sudo systemctl enable celestia-appd
+    sudo systemctl restart celestia-appd && sudo journalctl -u celestia-appd -f
+  args:
+    executable: /bin/bash
+  become: false

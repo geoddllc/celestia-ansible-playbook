@@ -1,0 +1,8 @@
+---
+- name: Download genesis and addrbook
+  shell: |
+    wget -O $HOME/.celestia-app/config/genesis.json https://server-4.itrocket.net/testnet/celestia/genesis.json
+    wget -O $HOME/.celestia-app/config/addrbook.json https://server-4.itrocket.net/testnet/celestia/addrbook.json
+  args:
+    executable: /bin/bash
+  become: false

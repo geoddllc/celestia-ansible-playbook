@@ -1,0 +1,9 @@
+---
+- name: Initialize Celestia app
+  shell: |
+    celestia-appd init "test" --chain-id {{ celestia_chain_id }}
+    cp $HOME/networks/{{ celestia_chain_id }}/genesis.json $HOME/.celestia-app/config
+    sed -i -e "s|^timeout_commit *=.*|timeout_commit = '11s'|" $HOME/.celestia-app/config/config.toml
+  args:
+    executable: /bin/bash
+  become: false

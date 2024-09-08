@@ -1,0 +1,16 @@
+---
+- name: Setup Celestia Node
+  hosts: primary
+  become: yes
+  vars:
+    go_version: "1.23.1"
+    app_version: "v2.1.2"
+    celestia_chain_id: "mocha-4"
+    celestia_port: 26657
+    seeds: "5d0bf034d6e6a8b5ee31a2f42f753f1107b3a00e@celestia-testnet-seed.itrocket.net:11656"
+    peers: "daf2cecee2bd7f1b3bf94839f993f807c6b15fbf@celestia-testnet-peer.itrocket.net:11656"
+
+  roles:
+    - install_dependencies
+    - install_go
+    - setup_celestia

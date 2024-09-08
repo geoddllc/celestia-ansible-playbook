@@ -2,5 +2,4 @@
 - hosts: primary
   become: yes
   roles:
-    - install_dependencies
-    - install_go
+    - snapshot_sync

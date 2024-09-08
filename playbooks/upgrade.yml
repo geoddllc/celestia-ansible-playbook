@@ -1,0 +1,45 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    app_version: "v2.1.2"
+    app_repo: "https://github.com/celestiaorg/celestia-app.git"
+    home_dir: "/home/{{ ansible_user }}"
+
+  tasks:
+    - name: Check if Celestia app directory exists
+      stat:
+        path: "{{ home_dir }}/celestia-app"
+      register: celestia_app_dir
+
+    - name: Clone Celestia app repository if not present
+      git:
+        repo: "{{ app_repo }}"
+        dest: "{{ home_dir }}/celestia-app"
+        version: "{{ app_version }}"
+        force: yes
+      when: not celestia_app_dir.stat.exists
+
+    - name: Pull latest changes from Celestia repository if already cloned
+      git:
+        repo: "{{ app_repo }}"
+        dest: "{{ home_dir }}/celestia-app"
+        version: "{{ app_version }}"
+        force: yes
+      when: celestia_app_dir.stat.exists
+
+    - name: Build Celestia app
+      shell: |
+        cd {{ home_dir }}/celestia-app
+        git checkout tags/{{ app_version }} -b {{ app_version }}
+        make install
+
+    - name: Restart Celestia app service
+      shell: |
+        sudo systemctl restart celestia-appd
+
+    - name: Ensure the Celestia service is running
+      systemd:
+        name: celestia-appd
+        state: started
+        enabled: yes
