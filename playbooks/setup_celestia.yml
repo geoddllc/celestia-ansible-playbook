@@ -3,7 +3,7 @@
   hosts: primary
   become: yes
   vars:
-    go_version: "1.23.1"
+    go_version: "1.22.0"
     app_version: "v2.1.2"
     celestia_chain_id: "mocha-4"
     celestia_port: 26657
@@ -12,5 +12,4 @@
 
   roles:
     - install_dependencies
-    - install_go
     - setup_celestia

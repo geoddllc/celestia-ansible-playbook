@@ -1,4 +1,5 @@
 ---
+# - include_tasks: install_go.yml
 - include_tasks: download_celestia_binary.yml
 - include_tasks: clone_networks.yml
 - include_tasks: initialize_celestia.yml
@@ -8,4 +9,4 @@
 - include_tasks: configure_pruning.yml
 - include_tasks: set_gas_price_prometheus.yml
 - include_tasks: create_service.yml
-- include_tasks: reload_systemd.yml
+# - include_tasks: reload_systemd.yml

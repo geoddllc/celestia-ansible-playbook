@@ -1,12 +1,30 @@
 ---
-- name: Download Celestia binary
+- name: Clean up existing Celestia app directory
   shell: |
-    cd $HOME
-    rm -rf celestia-app
-    git clone https://github.com/celestiaorg/celestia-app.git
-    cd celestia-app/
+    rm -rf $HOME/celestia-app
+  args:
+    executable: /bin/bash
+  become: false
+  changed_when: false
+
+- name: Clone Celestia app repository
+  git:
+    repo: https://github.com/celestiaorg/celestia-app.git
+    dest: "~/celestia-app"  # Use the current user's home directory with `~`
+    version: "tags/{{ app_version }}"
+  become: false
+
+- name: Checkout specific Celestia version
+  shell: |
+    cd $HOME/celestia-app
     git checkout tags/{{ app_version }} -b {{ app_version }}
-    make install
+  args:
+    executable: /bin/bash
+  become: false
+
+- name: Build and install Celestia binary (with Go environment loaded)
+  shell: |
+    source $HOME/.bash_profile && cd $HOME/celestia-app && make install
   args:
     executable: /bin/bash
   become: false
