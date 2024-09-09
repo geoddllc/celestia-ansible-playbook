@@ -12,4 +12,4 @@
 
   roles:
     - install_dependencies
-    - setup_celestia
+    - validator_node

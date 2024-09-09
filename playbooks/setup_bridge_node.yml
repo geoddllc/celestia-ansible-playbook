@@ -8,12 +8,40 @@
     rpc_node_ip: ""  # Replace with the actual RPC node IP
   tasks:
     - name: Install Go Lang
-      import_role:
+      include_role:
         name: install_go
-    - include_tasks: roles/bridge_node/cleanup_celestia.yml
-    - include_tasks: roles/bridge_node/clone_celestia_repo.yml
-    - include_tasks: roles/bridge_node/build_and_install_celestia.yml
-    - include_tasks: roles/bridge_node/initialize_bridge_node.yml
-    - include_tasks: roles/bridge_node/create_systemd_service.yml
-    - include_tasks: roles/bridge_node/reload_systemd.yml
-    - include_tasks: roles/bridge_node/start_bridge_service.yml
+
+    - name: Clean up existing Celestia app directory
+      include_role:
+        name: bridge_node
+        tasks_from: cleanup_celestia.yml
+
+    - name: Clone Celestia repository
+      include_role:
+        name: bridge_node
+        tasks_from: clone_celestia_repo.yml
+
+    - name: Build and install Celestia bridge node
+      include_role:
+        name: bridge_node
+        tasks_from: build_and_install_celestia.yml
+
+    - name: Initialize Celestia bridge node
+      include_role:
+        name: bridge_node
+        tasks_from: initialize_bridge_node.yml
+
+    - name: Create Celestia bridge systemd service
+      include_role:
+        name: bridge_node
+        tasks_from: create_systemd_service.yml
+
+    - name: Reload systemd
+      include_role:
+        name: bridge_node
+        tasks_from: reload_systemd.yml
+
+    - name: Start Celestia bridge service
+      include_role:
+        name: bridge_node
+        tasks_from: start_bridge_service.yml

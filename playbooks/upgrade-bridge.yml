@@ -2,6 +2,8 @@
 - name: Upgrade Celestia Bridge Node
   hosts: bridge-node-servers
   become: yes
+  vars:
+    bridge_version: "v0.16.0"
   tasks:
 
     - name: Stop Celestia Bridge service
@@ -10,8 +12,16 @@
         executable: /bin/bash
       become: yes
 
-    - include_tasks: roles/bridge_node/clone_celestia_repo.yml
-    - include_tasks: roles/bridge_node/build_and_install_celestia.yml
+    - name: Clone Celestia repository
+      include_role:
+        name: bridge_node
+        tasks_from: clone_celestia_repo.yml
+
+    - name: Build and install Celestia bridge node
+      include_role:
+        name: bridge_node
+        tasks_from: build_and_install_celestia.yml
+
     
     - name: Update Celestia bridge configuration
       shell: celestia bridge config-update --p2p.network mocha
