@@ -1,10 +1,89 @@
 ---
-- name: Setup Bridge Node
-  hosts: 
+- name: Install and configure Celestia Bridge Node
+  hosts: bridge-node-servers
   become: yes
   vars:
     go_version: "1.22.0"
     bridge_version: "v0.16.0"
-  roles:
-    - install_dependencies
-    - setup_celestia
+    rpc_node_ip: "<RPC_NODE_IP>"  # Replace with the actual RPC node IP
+  tasks:
+    - name: Update system and install necessary packages
+      apt:
+        name:
+          - curl
+          - git
+          - wget
+          - htop
+          - tmux
+          - build-essential
+          - jq
+          - make
+          - gcc
+          - tar
+          - clang
+          - pkg-config
+          - libssl-dev
+          - ncdu
+        state: present
+        update_cache: yes
+    - name: Install Go Lang
+      import_role:
+        name: install_go
+    - name: Clean up existing Celestia node directory
+      shell: rm -rf $HOME/celestia-node
+      args:
+        executable: /bin/bash
+      become: no
+
+    - name: Clone Celestia bridge node repository
+      git:
+        repo: https://github.com/celestiaorg/celestia-node.git
+        dest: "{{ ansible_env.HOME }}/celestia-node"
+        version: "tags/{{ bridge_version }}"
+      become: no
+
+    - name: Build and install Celestia bridge node
+      shell: |
+        cd $HOME/celestia-node
+        make build
+        sudo make install
+        make cel-key
+      args:
+        executable: /bin/bash
+      become: no
+
+    - name: Initialize Celestia Bridge node
+      shell: |
+        celestia bridge init --core.ip {{ rpc_node_ip }} --p2p.network mocha
+      args:
+        executable: /bin/bash
+      become: no
+
+    - name: Create Celestia bridge systemd service file
+      copy:
+        dest: /etc/systemd/system/celestia-bridge.service
+        content: |
+          [Unit]
+          Description=Celestia Bridge
+          After=network-online.target
+
+          [Service]
+          User={{ ansible_user }}
+          ExecStart=$(which celestia) bridge start \
+          --p2p.network mocha \
+          --metrics.tls=true --metrics --metrics.endpoint otel.celestia-mocha.com
+          Restart=on-failure
+          RestartSec=3
+          LimitNOFILE=65535
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd and enable Celestia Bridge service
+      shell: |
+        sudo systemctl daemon-reload
+        sudo systemctl enable celestia-bridge
+        sudo systemctl restart celestia-bridge && sudo journalctl -u celestia-bridge -f
+      args:
+        executable: /bin/bash
+      become: yes

@@ -1,0 +1,46 @@
+---
+- name: Upgrade Celestia Bridge Node
+  hosts: bridge-node-servers
+  become: yes
+  tasks:
+
+    - name: Stop Celestia Bridge service
+      shell: sudo systemctl stop celestia-bridge
+      args:
+        executable: /bin/bash
+      become: yes
+
+    - name: Remove existing Celestia node directory
+      shell: rm -rf $HOME/celestia-node
+      args:
+        executable: /bin/bash
+      become: no
+
+    - name: Clone the latest Celestia bridge node repository
+      git:
+        repo: https://github.com/celestiaorg/celestia-node.git
+        dest: "{{ ansible_env.HOME }}/celestia-node"
+        version: "tags/{{ bridge_version }}"
+      become: no
+
+    - name: Build and install Celestia bridge node
+      shell: |
+        cd $HOME/celestia-node
+        make build
+        sudo make install
+        make cel-key
+      args:
+        executable: /bin/bash
+      become: no
+
+    - name: Update Celestia bridge configuration
+      shell: celestia bridge config-update --p2p.network mocha
+      args:
+        executable: /bin/bash
+      become: no
+
+    - name: Restart Celestia Bridge service
+      shell: sudo systemctl restart celestia-bridge
+      args:
+        executable: /bin/bash
+      become: yes

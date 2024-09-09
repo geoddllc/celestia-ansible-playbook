@@ -1,0 +1,40 @@
+---
+- name: Download Golang {{ go_version }}
+  ansible.builtin.get_url:
+    url: "https://golang.org/dl/go{{ go_version }}.linux-amd64.tar.gz"
+    dest: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
+
+- name: Remove existing Go installation
+  ansible.builtin.file:
+    path: "/usr/local/go"
+    state: absent
+
+- name: Extract Golang to /usr/local
+  ansible.builtin.unarchive:
+    src: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
+    dest: "/usr/local"
+    remote_src: yes
+
+- name: Remove Go tarball
+  ansible.builtin.file:
+    path: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
+    state: absent
+
+- name: Ensure Go binary path is in .bash_profile
+  ansible.builtin.lineinfile:
+    dest: "{{ ansible_env.HOME }}/.bash_profile"
+    line: 'export PATH=$PATH:/usr/local/go/bin:{{ ansible_env.HOME }}/go/bin'
+    state: present
+
+- name: Source .bash_profile and check Go version
+  shell: |
+    source {{ ansible_env.HOME }}/.bash_profile
+    go version
+  args:
+    executable: /bin/bash
+  register: go_version_output
+  failed_when: "'go version' not in go_version_output.stdout"
+
+- name: Print Go version
+  debug:
+    msg: "{{ go_version_output.stdout }}"
