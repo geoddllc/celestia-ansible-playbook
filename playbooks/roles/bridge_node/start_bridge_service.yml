@@ -1,0 +1,6 @@
+- name: Start Celestia Bridge service
+  shell: |
+    sudo systemctl start celestia-bridge
+  args:
+    executable: /bin/bash
+  become: yes

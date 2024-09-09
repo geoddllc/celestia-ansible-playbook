@@ -1,0 +1,7 @@
+- name: Reload systemd and enable Celestia Bridge service
+  shell: |
+    sudo systemctl daemon-reload
+    sudo systemctl enable celestia-bridge
+  args:
+    executable: /bin/bash
+  become: yes

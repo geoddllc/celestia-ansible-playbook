@@ -1,5 +1,5 @@
 ---
-# - include_tasks: install_go.yml
+- include_tasks: install_go.yml
 - include_tasks: download_celestia_binary.yml
 - include_tasks: clone_networks.yml
 - include_tasks: initialize_celestia.yml

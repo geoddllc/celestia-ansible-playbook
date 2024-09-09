@@ -1,0 +1,10 @@
+- name: Build and install Celestia bridge node
+  shell: |
+    source ~/.bash_profile
+    cd /home/{{ ansible_user }}/celestia-node
+    make build
+    make install
+    make cel-key
+  args:
+    executable: /bin/bash
+  become: no  # Don't escalate privileges to root

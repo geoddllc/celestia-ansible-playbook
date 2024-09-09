@@ -1,6 +1,6 @@
 ---
 - name: Setup Celestia Node
-  hosts: primary
+  hosts: bridge
   become: yes
   vars:
     go_version: "1.22.0"

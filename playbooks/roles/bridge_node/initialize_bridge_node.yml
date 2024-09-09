@@ -1,0 +1,7 @@
+- name: Initialize Celestia Bridge node
+  shell: |
+    source /home/{{ ansible_user }}/.bash_profile
+    celestia bridge init --core.ip {{ rpc_node_ip }} --p2p.network mocha
+  args:
+    executable: /bin/bash
+  become: no

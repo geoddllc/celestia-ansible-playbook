@@ -1,0 +1,7 @@
+- name: Clean up existing Celestia app directory
+  shell: |
+    rm -rf $HOME/celestia-app
+  args:
+    executable: /bin/bash
+  become: false
+  changed_when: false

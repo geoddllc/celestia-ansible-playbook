@@ -1,0 +1,19 @@
+- name: Create Celestia bridge systemd service file
+  copy:
+    dest: /etc/systemd/system/celestia-bridge.service
+    content: |
+      [Unit]
+      Description=Celestia Bridge
+      After=network-online.target
+
+      [Service]
+      User={{ ansible_user }}
+      ExecStart=/usr/local/bin/celestia bridge start \
+        --p2p.network mocha \
+        --metrics.tls=true --metrics --metrics.endpoint otel.celestia-mocha.com
+      Restart=on-failure
+      RestartSec=3
+      LimitNOFILE=65535
+
+      [Install]
+      WantedBy=multi-user.target

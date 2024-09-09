@@ -20,15 +20,27 @@
     path: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
     state: absent
 
-- name: Ensure Go binary path is in .bash_profile
+- name: Create .bash_profile if it does not exist for the remote user
+  become: yes
+  become_user: "{{ ansible_ssh_user | default(ansible_env.USER) }}"  # Use ansible_ssh_user or fallback to system user
+  ansible.builtin.file:
+    path: "/home/{{ ansible_ssh_user | default(ansible_env.USER) }}/.bash_profile"
+    state: touch
+    mode: '0644'
+
+- name: Ensure Go binary path is in the remote user's .bash_profile
+  become: yes
+  become_user: "{{ ansible_ssh_user | default(ansible_env.USER) }}"  # Use ansible_ssh_user or fallback to system user
   ansible.builtin.lineinfile:
-    dest: "{{ ansible_env.HOME }}/.bash_profile"
-    line: 'export PATH=$PATH:/usr/local/go/bin:{{ ansible_env.HOME }}/go/bin'
+    dest: "/home/{{ ansible_ssh_user | default(ansible_env.USER) }}/.bash_profile"
+    line: 'export PATH=$PATH:/usr/local/go/bin:/home/{{ ansible_ssh_user | default(ansible_env.USER) }}/go/bin'
     state: present
 
 - name: Source .bash_profile and check Go version
+  become: yes
+  become_user: "{{ ansible_ssh_user | default(ansible_env.USER) }}"  # Use ansible_ssh_user or fallback to system user
   shell: |
-    source {{ ansible_env.HOME }}/.bash_profile
+    source /home/{{ ansible_ssh_user | default(ansible_env.USER) }}/.bash_profile
     go version
   args:
     executable: /bin/bash

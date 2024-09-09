@@ -10,29 +10,9 @@
         executable: /bin/bash
       become: yes
 
-    - name: Remove existing Celestia node directory
-      shell: rm -rf $HOME/celestia-node
-      args:
-        executable: /bin/bash
-      become: no
-
-    - name: Clone the latest Celestia bridge node repository
-      git:
-        repo: https://github.com/celestiaorg/celestia-node.git
-        dest: "{{ ansible_env.HOME }}/celestia-node"
-        version: "tags/{{ bridge_version }}"
-      become: no
-
-    - name: Build and install Celestia bridge node
-      shell: |
-        cd $HOME/celestia-node
-        make build
-        sudo make install
-        make cel-key
-      args:
-        executable: /bin/bash
-      become: no
-
+    - include_tasks: roles/bridge_node/clone_celestia_repo.yml
+    - include_tasks: roles/bridge_node/build_and_install_celestia.yml
+    
     - name: Update Celestia bridge configuration
       shell: celestia bridge config-update --p2p.network mocha
       args:
