@@ -1,0 +1,10 @@
+---
+- name: Setup Bridge Node
+  hosts: 
+  become: yes
+  vars:
+    go_version: "1.22.0"
+    bridge_version: "v0.16.0"
+  roles:
+    - install_dependencies
+    - setup_celestia

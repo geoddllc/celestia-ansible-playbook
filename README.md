@@ -44,17 +44,17 @@ secondary-server ansible_host=192.168.100.2
 ## Setup Node
 To run the playbook, use the following command:
 ```
-ansible-playbook -i hosts.ini playbooks/setup_celestia.yml -l primary
+ansible-playbook -i hosts.ini playbooks/setup_celestia-validator.yml -l <HOSTNAME IN hosts.ini>
 ```
 This command will set up the Celestia node on the primary-server. If you want to target multiple servers, you can modify the -l flag to include the desired hosts.
 
 ## Upgrade Node 
 To upgrade the Celestia nodes, use the following playbook. 
-Change the varriable upgrade_clestia.yml to desired version
+Change the varriable upgrade-validator.yml to desired version
 `` app_version: "v2.1.2"``
 
 ```
-ansible-playbook -i hosts.ini playbooks/upgrade_celestia.yml
+ansible-playbook -i hosts.ini playbooks/upgrade-validator.yml -l <HOSTNAME IN hosts.ini>
 ```
 This will do automated upgrades of all your servers if needed
 

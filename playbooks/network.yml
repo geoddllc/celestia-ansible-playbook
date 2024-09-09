@@ -1,0 +1,72 @@
+---
+- name: Setup Network Bonding with Netplan and Fetch New IP
+  hosts: onboarding
+  become: yes
+  tasks:
+
+    - name: Ensure network-manager is installed
+      apt:
+        name: network-manager
+        state: present
+        update_cache: yes
+
+    - name: Upgrade network-manager
+      apt:
+        name: network-manager
+        state: latest
+
+    - name: Install bridge-utils
+      apt:
+        name: bridge-utils
+        state: present
+
+    - name: Check if bonding module is loaded
+      shell: lsmod | grep bond
+      register: bonding_loaded
+      ignore_errors: yes
+
+    - name: Load bonding module if not loaded
+      shell: modprobe bonding
+      when: bonding_loaded.rc != 0
+
+    - name: Verify bonding module is loaded
+      shell: lsmod | grep bond
+
+    - name: Install ifenslave
+      apt:
+        name: ifenslave
+        state: present
+
+    - name: Install net-tools
+      apt:
+        name: net-tools
+        state: present
+
+    - name: Add bond0 interface
+      command: ip link add bond0 type bond mode 802.3ad
+      ignore_errors: yes
+
+    - name: Create netplan configuration for bonding
+      copy:
+        dest: /etc/netplan/01-network-manager-all.yaml
+        content: |
+          network:
+            version: 2
+            renderer: NetworkManager
+            ethernets:
+              eno1: {}
+              eno2: {}
+              eno3: {}
+              eno4: {}
+            bonds:
+              bond0:
+                interfaces: [eno1, eno2]
+                dhcp4: true
+                parameters:
+                  mode: active-backup
+                  primary: eno1
+                  transmit-hash-policy: layer3+4
+                  mii-monitor-interval: 1
+
+    - name: Apply netplan configuration
+      command: netplan apply
