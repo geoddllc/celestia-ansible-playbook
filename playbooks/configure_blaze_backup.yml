@@ -1,0 +1,21 @@
+---
+- name: Install and configure rclone for Backblaze B2
+  hosts: all
+  become: yes
+  vars_files:
+    - secrets.yml  # The file containing your encrypted variables
+  tasks:
+    - name: Ensure rclone is installed
+      apt:
+        name: rclone
+        state: present
+      when: ansible_os_family == 'Debian'
+
+    - name: Configure rclone for Backblaze B2
+      shell: |
+        rclone config create backblaze b2 \
+        account={{ backblaze_account_id }} \
+        key={{ backblaze_application_key }} \
+        endpoint=s3.eu-central-003.backblazeb2.com
+      args:
+        executable: /bin/bash
