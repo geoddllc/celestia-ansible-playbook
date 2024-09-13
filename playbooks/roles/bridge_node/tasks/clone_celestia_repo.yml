@@ -1,4 +1,3 @@
----
 - name: Ensure Celestia bridge node repository is present
   git:
     repo: https://github.com/celestiaorg/celestia-node.git

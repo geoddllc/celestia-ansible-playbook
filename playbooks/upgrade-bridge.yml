@@ -22,7 +22,6 @@
         name: bridge_node
         tasks_from: build_and_install_celestia.yml
 
-    
     - name: Update Celestia bridge configuration
       shell: celestia bridge config-update --p2p.network mocha
       args:

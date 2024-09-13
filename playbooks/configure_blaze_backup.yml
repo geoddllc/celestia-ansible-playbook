@@ -2,20 +2,38 @@
 - name: Install and configure rclone for Backblaze B2
   hosts: all
   become: yes
-  vars_files:
-    - secrets.yml  # The file containing your encrypted variables
+
+  vars:
+    # Variables to store Backblaze credentials
+    backblaze_account_id: ""
+    backblaze_application_key: ""
+
   tasks:
+    # Install rclone
     - name: Ensure rclone is installed
       apt:
         name: rclone
         state: present
       when: ansible_os_family == 'Debian'
 
-    - name: Configure rclone for Backblaze B2
-      shell: |
-        rclone config create backblaze b2 \
-        account={{ backblaze_account_id }} \
-        key={{ backblaze_application_key }} \
-        endpoint=s3.eu-central-003.backblazeb2.com
-      args:
-        executable: /bin/bash
+    # Create the rclone config directory for the logged-in user (e.g., ubuntu)
+    - name: Create rclone config directory
+      file:
+        path: "/home/{{ ansible_user }}/.config/rclone"  # Explicitly set home directory for non-root user
+        state: directory
+        owner: "{{ ansible_user }}"  # Set ownership to logged-in user
+        group: "{{ ansible_user }}"
+        mode: '0755'
+
+    # Write the rclone config file with the Backblaze credentials
+    - name: Create rclone config for Backblaze B2
+      copy:
+        dest: "/home/{{ ansible_user }}/.config/rclone/rclone.conf"  # Explicitly set home directory
+        content: |
+          [backblaze]
+          type = b2
+          account = {{ backblaze_account_id }}
+          key = {{ backblaze_application_key }}
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0600'
