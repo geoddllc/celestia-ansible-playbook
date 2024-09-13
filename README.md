@@ -59,7 +59,5 @@ ansible-playbook -i hosts.ini playbooks/upgrade-validator.yml -l <HOSTNAME IN ho
 This will do automated upgrades of all your servers if needed
 
 ## TODO (Planned Features)
-- **State Sync**: Implement state sync to improve recovery and reduce sync time.
-- **Backup Configuration**: Automatically back up the Celestia configuration files to a cloud service such as S3 or Backblaze.
 - **Active-Passive Failover**: Set up an automatic failover system where a secondary node takes over if the primary node fails.
 

@@ -1,0 +1,38 @@
+---
+- name: Back up Celestia Validator to Backblaze B2 with a timestamped folder
+  hosts: all
+  become: no
+
+  vars:
+    # The Backblaze B2 bucket and Celestia directories to back up
+    backblaze_bucket: "celestia-testnet-geodd"
+    celestia_app_dir: "/home/{{ ansible_user }}/.celestia-app"
+    backup_dirs:
+      - "config"
+      - "keyring-test"
+
+  tasks:
+    # Install rclone if not already present
+    - name: Ensure rclone is installed
+      apt:
+        name: rclone
+        state: present
+      when: ansible_os_family == 'Debian'
+
+    # Ensure the .config/rclone directory exists
+    - name: Ensure rclone config directory exists
+      file:
+        path: "/home/{{ ansible_user }}/.config/rclone"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+
+    # Back up each directory to Backblaze B2 with a timestamp
+    - name: Back up Celestia directories to Backblaze B2 with a timestamped folder
+      shell: |
+        rclone copy {{ celestia_app_dir }}/{{ item }} backblaze:{{ backblaze_bucket }}/backup/`date +'%Y-%m-%d'`/{{ item }} --verbose
+      with_items: "{{ backup_dirs }}"
+      args:
+        executable: /bin/bash
+
