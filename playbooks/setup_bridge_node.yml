@@ -7,6 +7,30 @@
     bridge_version: "v0.16.0"
     rpc_node_ip: ""  # Replace with the actual RPC node IP
   tasks:
+    - name: Update and upgrade apt packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+        force_apt_get: yes
+
+    - name: Install required system packages
+      apt:
+        name:
+          - curl
+          - git
+          - wget
+          - htop
+          - tmux
+          - build-essential
+          - jq
+          - make
+          - gcc
+          - tar
+          - clang
+          - pkg-config
+          - libssl-dev
+          - ncdu
+        state: present
     - name: Install Go Lang
       include_role:
         name: install_go
@@ -40,8 +64,3 @@
       include_role:
         name: bridge_node
         tasks_from: reload_systemd.yml
-
-    - name: Start Celestia bridge service
-      include_role:
-        name: bridge_node
-        tasks_from: start_bridge_service.yml
