@@ -5,7 +5,7 @@ After=network-online.target
 [Service]
 User={{ ansible_user | default('ubuntu') }}
 WorkingDirectory=/home/{{ ansible_user | default('ubuntu') }}/.celestia-app
-ExecStart=/usr/local/go/bin/celestia-appd start --home /home/{{ ansible_user | default('ubuntu') }}/.celestia-app
+ExecStart=/home/{{ ansible_user | default('ubuntu') }}/go/bin/celestia-appd start --home /home/{{ ansible_user | default('ubuntu') }}/.celestia-app
 Restart=on-failure
 RestartSec=5
 LimitNOFILE=65535
