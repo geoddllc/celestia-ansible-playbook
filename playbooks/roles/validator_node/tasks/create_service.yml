@@ -1,18 +1,10 @@
 ---
-- name: Create Celestia systemd service file
-  copy:
+- name: Create celestia-appd systemd service
+  ansible.builtin.template:
+    src: celestia-appd.service.j2
     dest: /etc/systemd/system/celestia-appd.service
-    content: |
-      [Unit]
-      Description=Celestia node
-      After=network-online.target
-      [Service]
-      User={{ ansible_user }}
-      WorkingDirectory=$HOME/.celestia-app
-      ExecStart=$(which celestia-appd) start --home $HOME/.celestia-app
-      Restart=on-failure
-      RestartSec=5
-      LimitNOFILE=65535
-      [Install]
-      WantedBy=multi-user.target
   become: true
+
+- name: Reload systemd to apply new service
+  ansible.builtin.systemd:
+    daemon_reload: yes

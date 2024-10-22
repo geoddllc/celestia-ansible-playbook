@@ -1,0 +1,14 @@
+[Unit]
+Description=Celestia node
+After=network-online.target
+
+[Service]
+User={{ ansible_user | default('ubuntu') }}
+WorkingDirectory=/home/{{ ansible_user | default('ubuntu') }}/.celestia-app
+ExecStart=/usr/local/go/bin/celestia-appd start --home /home/{{ ansible_user | default('ubuntu') }}/.celestia-app
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
