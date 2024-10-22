@@ -1,10 +1,10 @@
 ---
 - name: Setup Celestia Node
-  hosts: bridge
+  hosts: validator
   become: yes
   vars:
     go_version: "1.22.0"
-    app_version: "v2.1.2"
+    app_version: "v2.2.0"
     celestia_chain_id: "mocha-4"
     celestia_port: 26657
     seeds: "5d0bf034d6e6a8b5ee31a2f42f753f1107b3a00e@celestia-testnet-seed.itrocket.net:11656"
