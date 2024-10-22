@@ -1,0 +1,49 @@
+---
+- name: Register Celestia Validator
+  hosts: all
+  become: yes
+  vars:
+    wallet_name: "my_wallet"  # Replace this with your existing wallet name
+    amount_stake: "1000000utia"  # Adjust the staking amount as needed
+    moniker: "test-validator"  # Replace this with your validator name
+    chain_id: "mocha-4"  # Testnet chain ID
+    details: "I love blockchain ❤️"  # Description for the validator
+    website: "https://myvalidatorwebsite.com"  # Validator website
+
+  tasks:
+
+    - name: Ensure wallet and validator addresses are sourced from the environment
+      shell: |
+        source $HOME/.bash_profile
+
+    - name: Check sync status
+      shell: |
+        celestia-appd status 2>&1 | jq .sync_info.catching_up
+      register: sync_status
+
+    - name: Check if node is fully synced
+      debug:
+        msg: "Node is fully synced!"
+      when: sync_status.stdout == "false"
+
+    - name: Request user to ensure wallet is funded
+      debug:
+        msg: "Please ensure that the wallet {{ wallet_name }} is funded before creating the validator."
+
+    - name: Create a validator
+      shell: |
+        celestia-appd tx staking create-validator \
+        --amount {{ amount_stake }} \
+        --from {{ wallet_name }} \
+        --commission-rate 0.1 \
+        --commission-max-rate 0.2 \
+        --commission-max-change-rate 0.01 \
+        --min-self-delegation 1 \
+        --pubkey $(celestia-appd tendermint show-validator) \
+        --moniker "{{ moniker }}" \
+        --identity "" \
+        --website "{{ website }}" \
+        --details "{{ details }}" \
+        --chain-id {{ chain_id }} \
+        --gas auto --gas-adjustment 1.5 --gas-prices 0.005utia \
+        -y
