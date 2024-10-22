@@ -24,7 +24,8 @@
 
 - name: Build and install Celestia binary (with Go environment loaded)
   shell: |
-    source $HOME/.bash_profile && cd $HOME/celestia-app && make install
+    source /etc/profile.d/go.sh
+    cd $HOME/celestia-app && make install
   args:
     executable: /bin/bash
   become: false

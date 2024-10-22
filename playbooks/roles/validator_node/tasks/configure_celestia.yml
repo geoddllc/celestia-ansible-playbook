@@ -1,7 +1,7 @@
 ---
 - name: Configure Celestia node
   shell: |
-    source $HOME/.bash_profile
+    source /etc/profile.d/go.sh
     celestia-appd config keyring-backend os
     celestia-appd config chain-id {{ celestia_chain_id }}
   args:

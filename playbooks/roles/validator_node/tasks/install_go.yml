@@ -20,15 +20,33 @@
     path: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
     state: absent
 
+# Ensure Go binary path is in both .bash_profile and .bashrc for individual users
 - name: Ensure Go binary path is in .bash_profile
   ansible.builtin.lineinfile:
-    dest: "{{ ansible_env.HOME }}/.bash_profile"
+    path: "{{ ansible_env.HOME }}/.bash_profile"
     line: 'export PATH=$PATH:/usr/local/go/bin:{{ ansible_env.HOME }}/go/bin'
     state: present
 
-- name: Source .bash_profile and check Go version
+- name: Ensure Go binary path is in .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: 'export PATH=$PATH:/usr/local/go/bin:{{ ansible_env.HOME }}/go/bin'
+    state: present
+
+# Create a global Go path file under /etc/profile.d to ensure Go path for all users
+- name: Create /etc/profile.d/go.sh for persistent Go path
+  ansible.builtin.copy:
+    dest: "/etc/profile.d/go.sh"
+    content: |
+      export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name: Source /etc/profile and check Go version
   shell: |
-    source {{ ansible_env.HOME }}/.bash_profile
+    source /etc/profile
     go version
   args:
     executable: /bin/bash

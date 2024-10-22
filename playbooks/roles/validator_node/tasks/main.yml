@@ -2,8 +2,8 @@
 - include_tasks: install_go.yml
 - include_tasks: download_celestia_binary.yml
 - include_tasks: clone_networks.yml
-- include_tasks: initialize_celestia.yml
 - include_tasks: configure_celestia.yml
+- include_tasks: initialize_celestia.yml
 - include_tasks: download_genesis_addrbook.yml
 - include_tasks: set_seeds_peers.yml
 - include_tasks: configure_pruning.yml
