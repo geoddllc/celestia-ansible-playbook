@@ -25,7 +25,7 @@
 - name: Build and install Celestia binary (with Go environment loaded)
   shell: |
     source /etc/profile.d/go.sh
-    cd $HOME/celestia-app && make install
+    cd $HOME/celestia-app && make install && make enable-bbr && make configure-v3
   args:
     executable: /bin/bash
   become: false

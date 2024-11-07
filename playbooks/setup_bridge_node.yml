@@ -4,7 +4,7 @@
   become: yes
   vars:
     go_version: "1.23.0"
-    bridge_version: "v0.16.0"
+    bridge_version: "v0.20.0"
     rpc_node_ip: "172.16.0.109"  # Replace with the actual RPC node IP
   tasks:
     - name: Update and upgrade apt packages

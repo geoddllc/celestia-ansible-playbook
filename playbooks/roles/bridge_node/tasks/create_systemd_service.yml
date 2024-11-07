@@ -9,7 +9,7 @@
       [Service]
       User={{ ansible_user }}
       ExecStart=/usr/local/bin/celestia bridge start \
-        --p2p.network mocha \
+        --p2p.network mocha --archival \
         --metrics.tls=true --metrics --metrics.endpoint otel.celestia-mocha.com
       Restart=on-failure
       RestartSec=3

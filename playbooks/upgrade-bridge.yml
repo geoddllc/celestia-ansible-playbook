@@ -3,7 +3,7 @@
   hosts: bridge-node-servers
   become: yes
   vars:
-    bridge_version: "v0.16.0"
+    bridge_version: "v0.20.0"
   tasks:
 
     - name: Stop Celestia Bridge service
